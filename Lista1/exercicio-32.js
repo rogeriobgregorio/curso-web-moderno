@@ -10,5 +10,5 @@
      mediaAritmetica = mediaAritmetica/vetor.length
      return mediaAritmetica
  }
- const vetor = [34, 98, 104, 12, 95, 09, 15, 77]
+ const vetor = [34, 98, 104, 12, 95, 9, 15, 77]
  console.log(calcularMedia(vetor));
