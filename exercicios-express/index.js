@@ -1,12 +1,17 @@
 const express = require("express");
 const app = express();
 const saudacao = require("./saudacao-mid");
+const usuarioApi = require("./api/usuario");
+require("./api/produto")(app, "com param!");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text());
 
 app.use(saudacao("Rogério"));
+
+app.post("/usuarios", usuarioApi.salvar);
+app.get("/usuarios", usuarioApi.obter);
 
 app.use((req, res, next) => {
   console.log("Servidor express rodando!");
