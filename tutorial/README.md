@@ -273,6 +273,75 @@ module.exports = (models) => {
 - **Documentação**: Gere documentação com `Swagger`.
 - **Segurança**: Adicione cabeçalhos HTTP com `helmet` e configure CORS adequadamente.
 
---- 
+---
+
+### **11. Protegendo Rotas com JWT**
+
+#### 11.1. Criando Middleware de Autenticação
+No arquivo `src/middlewares/authMiddleware.js`:
+```javascript
+const jwt = require('jsonwebtoken');
+
+module.exports = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+};
+```
+
+Certifique-se de ter a variável de ambiente `JWT_SECRET` configurada no `.env`:
+```env
+JWT_SECRET=sua_chave_secreta
+JWT_EXPIRES_IN=1h
+```
+
+#### 11.2. Gerando Tokens
+No arquivo `src/utils/tokenUtil.js`, já mencionado no tutorial:
+```javascript
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
+
+exports.generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN }
+  );
+};
+```
+
+#### 11.3. Protegendo Rotas
+Exemplo de rota protegida no arquivo `src/routes/userRoutes.js`:
+```javascript
+const express = require('express');
+const userController = require('../controllers/userController');
+const authMiddleware = require('../middlewares/authMiddleware');
+
+const router = express.Router();
+
+router.post('/register', userController.register);
+router.post('/login', userController.login);
+
+// Rotas protegidas
+router.get('/profile', authMiddleware, async (req, res) => {
+  res.json({ message: `Welcome, user ${req.user.email}!` });
+});
+
+module.exports = router;
+```
+
+---
+
+Com essa extensão, o tutorial cobre a segurança básica com JWT, incluindo geração, verificação e proteção de rotas.
 
 Essa estrutura cobre a criação de uma API REST funcional com boas práticas.
